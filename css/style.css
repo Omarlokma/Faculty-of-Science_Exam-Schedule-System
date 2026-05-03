@@ -71,6 +71,13 @@ body {
   border-bottom: 2px solid var(--accent-gold);
 }
 
+/* On mobile: header scrolls with page (not sticky) */
+@media (max-width: 767px) {
+  .site-header {
+    position: static;
+  }
+}
+
 .header-content {
   display: flex;
   align-items: center;
