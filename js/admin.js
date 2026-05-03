@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Elements ----
     const adminTbody = document.getElementById('admin-tbody');
     const searchInput = document.getElementById('search-input');
-    const filterDept = document.getElementById('filter-dept');
+    const filterReg   = document.getElementById('filter-reg');
+    const filterLevel = document.getElementById('filter-level');
+    const filterDept  = document.getElementById('filter-dept');
     
     // Modals
     const formModal = document.getElementById('form-modal');
@@ -90,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 sections = Array.isArray(sectionsData) ? sectionsData : (sectionsData.data || []);
                 console.log('📦 Sections loaded:', sections.length, 'items');
                 if (sections.length > 0) console.log('📦 Sample section:', sections[0]);
-                populateSectionFilter();
                 populateSectionSelect();
             } else {
                 console.warn('⚠️ Sections fetch failed:', sectionsRes?.status);
@@ -101,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 laihas = Array.isArray(laihasData) ? laihasData : (laihasData.data || []);
                 console.log('📦 Laihas loaded:', laihas.length, 'items');
                 populateRegSelect();
+                populateSectionFilter(); // populate regulation filter too
             } else {
                 console.warn('⚠️ Laihas fetch failed:', laihasRes?.status);
             }
@@ -123,14 +125,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---- Populate Dropdowns from API Data ----
     const populateSectionFilter = () => {
-        // Clear existing options except "All"
-        filterDept.innerHTML = '<option value="all">All Departments - كل الأقسام</option>';
-        sections.forEach(sec => {
+        // Populate regulation filter from laihas
+        filterReg.innerHTML = '<option value="all">كل اللوائح</option>';
+        laihas.forEach(laiha => {
             const opt = document.createElement('option');
-            opt.value = sec.id;
-            opt.textContent = sec.name;
-            filterDept.appendChild(opt);
+            opt.value = laiha.id;
+            opt.textContent = laiha.name;
+            filterReg.appendChild(opt);
         });
+    };
+
+    // When Regulation filter changes → populate Level filter
+    const onFilterRegChange = () => {
+        const regId = filterReg.value;
+        filterLevel.innerHTML = '<option value="all">كل المستويات</option>';
+        filterDept.innerHTML  = '<option value="all">كل الأقسام</option>';
+        filterDept.disabled   = true;
+
+        if (regId !== 'all') {
+            const laiha = laihas.find(l => String(l.id) === String(regId));
+            if (laiha && laiha.levels) {
+                laiha.levels.forEach(lv => {
+                    const opt = document.createElement('option');
+                    opt.value = lv.id;
+                    opt.textContent = lv.name;
+                    filterLevel.appendChild(opt);
+                });
+            }
+            filterLevel.disabled = false;
+        } else {
+            filterLevel.disabled = true;
+        }
+        renderTable();
+    };
+
+    // When Level filter changes → populate Department filter
+    const onFilterLevelChange = () => {
+        const levelId = parseInt(filterLevel.value);
+        filterDept.innerHTML = '<option value="all">كل الأقسام</option>';
+
+        if (filterLevel.value !== 'all') {
+            const matchingSections = sections.filter(s => s.level && s.level.id === levelId);
+            matchingSections.forEach(sec => {
+                const opt = document.createElement('option');
+                opt.value = sec.id;
+                opt.textContent = sec.name.replace(/\u0640/g, '').trim();
+                filterDept.appendChild(opt);
+            });
+            filterDept.disabled = false;
+        } else {
+            filterDept.disabled = true;
+        }
+        renderTable();
     };
 
     const populateSectionSelect = () => {
@@ -189,17 +235,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---- Render Table ----
     const renderTable = () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const deptFilter = filterDept.value;
+        const searchTerm  = searchInput.value.toLowerCase();
+        const regFilter   = filterReg.value;    // laiha ID or 'all'
+        const levelFilter = filterLevel.value;  // level ID or 'all'
+        const deptFilter  = filterDept.value;   // section ID or 'all'
+
+        // Build set of valid level IDs for the selected laiha
+        let validLevelIds = null;
+        if (regFilter !== 'all') {
+            const laiha = laihas.find(l => String(l.id) === String(regFilter));
+            if (laiha && laiha.levels) {
+                validLevelIds = new Set(laiha.levels.map(lv => lv.id));
+            }
+        }
 
         const filtered = courses.filter(c => {
             const name = (c.course_name || '').toLowerCase();
             const code = (c.course_code || '').toLowerCase();
             const matchesSearch = name.includes(searchTerm) || code.includes(searchTerm);
-            // Support both section_id and nested section.id for filter
+
+            // Get this course's section from our sections array
             const courseSectionId = c.section_id || (c.section && c.section.id);
+
+            // 1) Filter by department/section
             const matchesDept = deptFilter === 'all' || String(courseSectionId) === String(deptFilter);
-            return matchesSearch && matchesDept;
+
+            // 2) Filter by level (via section → level)
+            let matchesLevel = true;
+            if (levelFilter !== 'all') {
+                const fullSec = sections.find(s => s.id == courseSectionId);
+                matchesLevel = fullSec && fullSec.level && String(fullSec.level.id) === String(levelFilter);
+            }
+
+            // 3) Filter by regulation (via section → level → laiha's validLevelIds)
+            let matchesReg = true;
+            if (validLevelIds) {
+                const fullSec = sections.find(s => s.id == courseSectionId);
+                matchesReg = fullSec && fullSec.level && validLevelIds.has(fullSec.level.id);
+            }
+
+            return matchesSearch && matchesDept && matchesLevel && matchesReg;
         });
 
         adminTbody.innerHTML = '';
@@ -244,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Filter listeners
     searchInput.addEventListener('input', renderTable);
+    filterReg.addEventListener('change', onFilterRegChange);
+    filterLevel.addEventListener('change', onFilterLevelChange);
     filterDept.addEventListener('change', renderTable);
 
     // ============================================
