@@ -516,23 +516,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const handleFile = async (file) => {
-        if (!file.name.match(/\.(csv|xlsx)$/i)) {
+        const handleFile = async (file) => {
+        if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
             showToast('Invalid file format. Please upload CSV or Excel.', 'error');
             return;
         }
-        showToast('File upload feature will be available once the backend supports it.', 'error');
+
+        const formData = new FormData();
+        formData.append('file-input', file);
+
+        try {
+            const response = await apiFetch('https://irrelievable-reina-puzzlingly.ngrok-free.dev/api/courses/import', {
+                method: 'POST',
+                body: formData 
+            });
+
+            if (response && response.ok) {
+                const data = await response.json();
+                showToast(data.message || 'File uploaded successfully! ✅', 'success');
+                fetchAllData();
+                
+                fileInput.value = '';
+                importPreview.style.display = 'none';
+                uploadArea.style.display = 'block';
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                showToast(`Error: ${errData.message || 'Failed to upload file'}`, 'error');
+            }
+        } catch (error) {
+            console.error('Upload Error:', error);
+            showToast('Error uploading file to server', 'error');
+        }
     };
-
-    document.getElementById('cancel-import').addEventListener('click', () => {
-        fileInput.value = '';
-        importPreview.style.display = 'none';
-        uploadArea.style.display = 'block';
-    });
-
-    document.getElementById('confirm-import').addEventListener('click', async () => {
-        showToast('Import confirmation will work once the backend supports batch import.', 'error');
-    });
 
     // ============================================
     // Initial Data Load
