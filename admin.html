@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Exam Schedule System</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="admin-sidebar-header">
+                <a href="index.html" class="brand">
+                    <img src="assets/logo.png" alt="Logo" class="brand-logo" style="height: 40px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M22 10v6M2 10l10-5 10 5-10 5z\'/%3E%3Cpath d=\'M6 12v5c3 3 9 3 12 0v-5\'/%3E%3C/svg%3E'">
+                    <span class="brand-title">Admin Panel</span>
+                </a>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="nav-item active" data-tab="manage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Manage Schedules
+                </a>
+                <a href="#" class="nav-item" data-tab="import">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Import Data
+                </a>
+                <a href="index.html" class="nav-item" style="margin-top: auto;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <button class="menu-toggle" id="menu-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-weight: 500;">Welcome, Admin</span>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">A</div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                
+                <!-- Manage Schedules View -->
+                <div id="view-manage" class="view-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Exam Schedules</h2>
+                            <button id="add-new-btn" class="btn btn-primary" style="width: auto;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Subject
+                            </button>
+                        </div>
+                        
+                        <div class="admin-table-actions" style="margin-bottom: 1.5rem;">
+                            <div class="search-box" style="flex: 1; max-width: 300px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="search-input" class="form-input" placeholder="Search subjects...">
+                            </div>
+                            <select class="form-select" style="width: 200px;" id="filter-dept">
+                                <option value="all">All Departments</option>
+                                <option value="cs">Computer Science</option>
+                                <option value="is">Information Systems</option>
+                            </select>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table id="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject Name</th>
+                                        <th>Date</th>
+                                        <th>Day</th>
+                                        <th>Time</th>
+                                        <th>Department</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import Data View -->
+                <div id="view-import" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Import Schedule Data</h2>
+                        </div>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Upload a CSV or Excel file to batch import exam schedules. The system will automatically map headers to standard fields.</p>
+                        
+                        <div class="upload-area" id="upload-area">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <h3 class="upload-text">Click or drag file to this area to upload</h3>
+                            <p class="upload-hint">Supported formats: .csv, .xlsx (Max size: 5MB)</p>
+                            <input type="file" id="file-input" accept=".csv, .xlsx" style="display: none;">
+                        </div>
+
+                        <div id="import-preview" style="display: none; margin-top: 2rem;">
+                            <h3 style="margin-bottom: 1rem; color: var(--primary-blue);">Preview Data</h3>
+                            <div class="table-wrapper" style="margin-bottom: 1.5rem;">
+                                <table style="font-size: 0.875rem;">
+                                    <thead><tr><th>Subject</th><th>Date</th><th>Day</th><th>Time</th><th>Dept.</th><th>Reg.</th></tr></thead>
+                                    <tbody id="preview-tbody"></tbody>
+                                </table>
+                            </div>
+                            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                <button class="btn btn-outline" id="cancel-import">Cancel</button>
+                                <button class="btn btn-primary" id="confirm-import">Confirm Import</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Subject</h3>
+                <button class="modal-close" id="close-form-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="subject-form">
+                    <input type="hidden" id="subject-id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-name">
+                                <span>Course Name</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">اسم المادة</span>
+                            </label>
+                            <input type="text" id="subject-name" class="form-input" placeholder="e.g. Mathematics" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-code">
+                                <span>Course Code</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">كود المادة</span>
+                            </label>
+                            <input type="text" id="subject-code" class="form-input" placeholder="e.g. MTH101" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-date">
+                                <span>Date</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">التاريخ</span>
+                            </label>
+                            <input type="date" id="subject-date" class="form-input" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-day">
+                                <span>Day</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">اليوم</span>
+                            </label>
+                            <select id="subject-day" class="form-select custom-select" required>
+                                <option value="">Select Day...</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-dept">
+                                <span>Department</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">القسم</span>
+                            </label>
+                            <select id="subject-dept" class="form-select custom-select" required>
+                                <option value="">Loading...</option>
+                                <!-- Populated from API -->
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center justify-content-between" for="subject-reg">
+                                <span>Regulation</span>
+                                <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">اللائحة</span>
+                            </label>
+                            <select id="subject-reg" class="form-select custom-select">
+                                <option value="">Loading...</option>
+                                <!-- Populated from API -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancel-form">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-subject">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header" style="background-color: var(--danger);">
+                <h3>Confirm Deletion</h3>
+                <button class="modal-close" id="close-delete-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="delete-subject-name">this subject</strong>? This action cannot be undone.</p>
+                <input type="hidden" id="delete-subject-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-delete">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete" style="background-color: var(--danger); color: white;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

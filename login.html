@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Exam Schedule System</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            padding: 2rem;
+        }
+        .login-card {
+            background: var(--surface-white);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 4px solid var(--primary-blue);
+        }
+        .login-logo {
+            height: 80px;
+            margin-bottom: 1.5rem;
+            object-fit: contain;
+        }
+        .login-title {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .login-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+        .login-form {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-card">
+            <img src="assets/logo.png" alt="Logo" class="login-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%230A192F\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M22 10v6M2 10l10-5 10 5-10 5z\'/%3E%3Cpath d=\'M6 12v5c3 3 9 3 12 0v-5\'/%3E%3C/svg%3E'">
+            <h2 class="login-title">Admin Dashboard</h2>
+            <p class="login-subtitle">Please enter your credentials to continue</p>
+
+            <form class="login-form" action="admin.html" method="POST" id="login-form">
+                <!-- For actual backend, change action="admin.html" to action="api/login.php" -->
+                
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center justify-content-between" for="username">
+                        <span class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Username
+                        </span>
+                        <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">اسم المستخدم</span>
+                    </label>
+                    <input type="text" id="username" name="username" class="form-input" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center justify-content-between" for="password">
+                        <span class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Password
+                        </span>
+                        <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">كلمة المرور</span>
+                    </label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center gap-2 mt-4" style="width: 100%; padding: 0.875rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    <span>Login</span>
+                    <span class="border-start border-light ps-2 ms-1 arabic" dir="rtl">تسجيل الدخول</span>
+                </button>
+            </form>
+            
+            <a href="index.html" class="d-inline-flex align-items-center gap-2 mt-4 text-muted text-decoration-none" style="font-size: 0.875rem; transition: color 0.2s ease;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Student Portal
+            </a>
+        </div>
+    </div>
+
+    <div id="login-error" style="display: none; background: rgba(239,68,68,0.1); color: var(--danger, #EF4444); border: 1px solid var(--danger, #EF4444); border-radius: 0.5rem; padding: 0.75rem 1rem; margin-top: 1rem; font-size: 0.875rem; text-align: center;"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Redirect if already logged in
+        if (Auth.isLoggedIn()) {
+            window.location.href = 'admin.html';
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = loginForm.querySelector('button[type="submit"]');
+        const errorBox = document.getElementById('login-error');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBox.style.display = 'none';
+
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Show loading state
+            const originalBtnHTML = loginBtn.innerHTML;
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Logging in... جاري الدخول</span>
+            `;
+
+            try {
+                const response = await fetch(API.LOGIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    // Save token & user info
+                    Auth.setToken(data.token);
+                    if (data.user) Auth.setUser(data.user);
+                    
+                    // Redirect to admin dashboard
+                    window.location.href = 'admin.html';
+                } else {
+                    // Show error from server
+                    const msg = data.message || data.error || 'Invalid email or password';
+                    errorBox.textContent = `❌ ${msg}`;
+                    errorBox.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorBox.innerHTML = '❌ Could not connect to the server.<br>لا يمكن الاتصال بالسيرفر.';
+                errorBox.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalBtnHTML;
+            }
+        });
+    </script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
