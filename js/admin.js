@@ -516,22 +516,196 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ---- parsedRows: holds rows parsed from Excel ----
+    let parsedRows = [];
+
     const handleFile = async (file) => {
-        if (!file.name.match(/\.(csv|xlsx)$/i)) {
-            showToast('Invalid file format. Please upload CSV or Excel.', 'error');
+        if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
+            showToast('صيغة الملف غير مدعومة. يرجى رفع xlsx أو csv.', 'error');
             return;
         }
-        showToast('File upload feature will be available once the backend supports it.', 'error');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                // Get raw rows as arrays (no header row assumed - skip row 1 if it's a header)
+                const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+                // Detect if first row is header (if col E doesn't look like a course name)
+                let startRow = 0;
+                if (rawRows.length > 0) {
+                    const firstCell = String(rawRows[0][0] || '');
+                    // If first row contains Arabic header keywords, skip it
+                    if (firstCell.includes('لائحة') || firstCell.includes('اللائحة') || firstCell.toLowerCase().includes('regulation')) {
+                        startRow = 1;
+                    }
+                }
+
+                parsedRows = [];
+                for (let i = startRow; i < rawRows.length; i++) {
+                    const row = rawRows[i];
+                    // Skip completely empty rows
+                    if (!row[4] && !row[5]) continue;
+
+                    // Column mapping:
+                    // A=0:اللائحة, B=1:البرنامج, C=2:المستوى, D=3:الشعبة
+                    // E=4:اسم المقرر, F=5:كود المقرر, G=6:اليوم, H=7:التاريخ
+                    const laihaName   = String(row[0] || '').trim();
+                    const levelName   = String(row[2] || '').trim();
+                    const sectionName = String(row[3] || '').trim().replace(/\u0640/g, ''); // strip Tatweel
+                    const courseName  = String(row[4] || '').trim();
+                    const courseCode  = String(row[5] || '').trim();
+                    const day         = String(row[6] || '').trim();
+                    let   date        = row[7];
+
+                    // Format date
+                    if (date instanceof Date) {
+                        const d = date;
+                        date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    } else {
+                        date = String(date || '').trim();
+                        // Try to parse M/D/YYYY
+                        const parts = date.split('/');
+                        if (parts.length === 3) {
+                            const [m, d, y] = parts;
+                            date = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+                        }
+                    }
+
+                    // Look up section ID: laiha → level → section
+                    let sectionId = null;
+                    let status    = '✅ جاهز';
+
+                    if (!courseName) { status = '⚠️ اسم المادة مفقود'; }
+                    else {
+                        // Find laiha
+                        const laiha = laihas.find(l => l.name === laihaName);
+                        if (!laiha) {
+                            status = `❌ لائحة غير موجودة: "${laihaName}"`;
+                        } else {
+                            // Find level within laiha
+                            const level = laiha.levels && laiha.levels.find(lv => lv.name === levelName);
+                            if (!level) {
+                                status = `❌ مستوى غير موجود: "${levelName}"`;
+                            } else {
+                                // Find section matching this level
+                                const sec = sections.find(s =>
+                                    s.level && s.level.id === level.id &&
+                                    s.name.replace(/\u0640/g, '').trim() === sectionName
+                                );
+                                if (!sec) {
+                                    status = `❌ شعبة غير موجودة: "${sectionName}"`;
+                                } else {
+                                    sectionId = sec.id;
+                                }
+                            }
+                        }
+                    }
+
+                    parsedRows.push({ laihaName, levelName, sectionName, courseName, courseCode, day, date, sectionId, status });
+                }
+
+                // Show preview
+                previewTbody.innerHTML = '';
+                parsedRows.forEach((r, idx) => {
+                    const tr = document.createElement('tr');
+                    const isOk = r.sectionId !== null && r.courseName;
+                    tr.style.background = isOk ? '' : '#fff5f5';
+                    tr.innerHTML = `
+                        <td>${idx + 1}</td>
+                        <td>${r.courseName || '-'}</td>
+                        <td><small>${r.courseCode || '-'}</small></td>
+                        <td>${r.day || '-'}</td>
+                        <td>${r.date || '-'}</td>
+                        <td><small>${r.sectionName}</small></td>
+                        <td style="font-size:0.8rem;">${r.status}</td>
+                    `;
+                    previewTbody.appendChild(tr);
+                });
+
+                const validCount = parsedRows.filter(r => r.sectionId !== null && r.courseName).length;
+                document.getElementById('preview-count').textContent = `${validCount} صف صالح من ${parsedRows.length}`;
+                importPreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+
+            } catch (err) {
+                console.error('Excel parse error:', err);
+                showToast('خطأ في قراءة الملف. تأكد أن الملف سليم.', 'error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
     };
 
     document.getElementById('cancel-import').addEventListener('click', () => {
         fileInput.value = '';
+        parsedRows = [];
         importPreview.style.display = 'none';
+        document.getElementById('import-progress').style.display = 'none';
         uploadArea.style.display = 'block';
     });
 
     document.getElementById('confirm-import').addEventListener('click', async () => {
-        showToast('Import confirmation will work once the backend supports batch import.', 'error');
+        const validRows = parsedRows.filter(r => r.sectionId !== null && r.courseName);
+        if (validRows.length === 0) {
+            showToast('لا توجد صفوف صالحة للاستيراد.', 'error');
+            return;
+        }
+
+        // Show progress
+        importPreview.style.display = 'none';
+        const progressDiv    = document.getElementById('import-progress');
+        const progressBar    = document.getElementById('progress-bar');
+        const progressCount  = document.getElementById('progress-count');
+        const progressLabel  = document.getElementById('progress-label');
+        const progressErrors = document.getElementById('progress-errors');
+        progressDiv.style.display = 'block';
+        progressErrors.textContent = '';
+
+        let done = 0, failed = 0;
+        const errors = [];
+
+        for (const row of validRows) {
+            try {
+                const res = await apiFetch(API.COURSES, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        course_name: row.courseName,
+                        course_code: row.courseCode,
+                        day:         row.day,
+                        date:        row.date,
+                        section_id:  row.sectionId,
+                    })
+                });
+                if (res && res.ok) {
+                    done++;
+                } else {
+                    failed++;
+                    errors.push(`❌ ${row.courseName}: فشل (${res?.status})`);
+                }
+            } catch (err) {
+                failed++;
+                errors.push(`❌ ${row.courseName}: خطأ في الشبكة`);
+            }
+
+            // Update progress bar
+            const pct = Math.round(((done + failed) / validRows.length) * 100);
+            progressBar.style.width = pct + '%';
+            progressCount.textContent = `${done + failed} / ${validRows.length}`;
+        }
+
+        progressLabel.textContent = done > 0 ? `✅ تم استيراد ${done} مادة بنجاح` : 'انتهى الاستيراد';
+        if (errors.length > 0) {
+            progressErrors.innerHTML = errors.join('<br>');
+        }
+        if (done > 0) {
+            showToast(`تم استيراد ${done} مادة بنجاح!`, 'success');
+            await fetchAllData(); // refresh table
+        }
+        fileInput.value = '';
+        parsedRows = [];
     });
 
     // ============================================

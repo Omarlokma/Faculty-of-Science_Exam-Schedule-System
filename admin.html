@@ -6,6 +6,9 @@
     <title>Admin Dashboard - Exam Schedule System</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <!-- SheetJS for Excel/CSV parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="admin-layout">
@@ -105,28 +108,70 @@
                 <div id="view-import" class="view-section" style="display: none;">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Import Schedule Data</h2>
-                        </div>
-                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Upload a CSV or Excel file to batch import exam schedules. The system will automatically map headers to standard fields.</p>
-                        
-                        <div class="upload-area" id="upload-area">
-                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <h3 class="upload-text">Click or drag file to this area to upload</h3>
-                            <p class="upload-hint">Supported formats: .csv, .xlsx (Max size: 5MB)</p>
-                            <input type="file" id="file-input" accept=".csv, .xlsx" style="display: none;">
+                            <h2 class="card-title">استيراد جدول الامتحانات</h2>
                         </div>
 
+                        <!-- Instructions -->
+                        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            <strong style="color: var(--primary-blue);">المطلوب في ملف الإكسل (بالترتيب):</strong>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem;">
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">A: اللائحة</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">B: البرنامج (اختياري)</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">C: المستوى</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">D: الشعبة</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">E: اسم المقرر</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">F: كود المقرر</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">G: اليوم</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">H: التاريخ</span>
+                                <span style="background:#0A192F; color:#fff; padding: 2px 8px; border-radius:4px; font-size:0.8rem;">I: الوقت</span>
+                            </div>
+                        </div>
+
+                        <!-- Upload Area -->
+                        <div class="upload-area" id="upload-area">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <h3 class="upload-text">اضغط أو اسحب ملف Excel هنا</h3>
+                            <p class="upload-hint">الصيغ المدعومة: .xlsx, .xls, .csv (الحد الأقصى: 5MB)</p>
+                            <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;">
+                        </div>
+
+                        <!-- Progress Bar (hidden by default) -->
+                        <div id="import-progress" style="display:none; margin-top: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+                                <span id="progress-label" style="font-size:0.9rem; color:var(--text-muted);">جاري الاستيراد...</span>
+                                <span id="progress-count" style="font-size:0.9rem; font-weight:600;">0 / 0</span>
+                            </div>
+                            <div style="background:#e2e8f0; border-radius:999px; height:10px; overflow:hidden;">
+                                <div id="progress-bar" style="height:100%; width:0%; background: var(--accent-gold); transition: width 0.3s;"></div>
+                            </div>
+                            <p id="progress-errors" style="margin-top:0.75rem; font-size:0.85rem; color:var(--danger);"></p>
+                        </div>
+
+                        <!-- Preview Table -->
                         <div id="import-preview" style="display: none; margin-top: 2rem;">
-                            <h3 style="margin-bottom: 1rem; color: var(--primary-blue);">Preview Data</h3>
-                            <div class="table-wrapper" style="margin-bottom: 1.5rem;">
-                                <table style="font-size: 0.875rem;">
-                                    <thead><tr><th>Subject</th><th>Date</th><th>Day</th><th>Time</th><th>Dept.</th><th>Reg.</th></tr></thead>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                                <h3 style="color: var(--primary-blue); margin:0;">معاينة البيانات</h3>
+                                <span id="preview-count" style="background:#e2e8f0; padding:4px 12px; border-radius:999px; font-size:0.85rem;"></span>
+                            </div>
+                            <div class="table-wrapper" style="margin-bottom: 1.5rem; max-height: 400px; overflow-y: auto;">
+                                <table style="font-size: 0.85rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم المادة</th>
+                                            <th>الكود</th>
+                                            <th>اليوم</th>
+                                            <th>التاريخ</th>
+                                            <th>الشعبة</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="preview-tbody"></tbody>
                                 </table>
                             </div>
                             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                                <button class="btn btn-outline" id="cancel-import">Cancel</button>
-                                <button class="btn btn-primary" id="confirm-import">Confirm Import</button>
+                                <button class="btn btn-outline" id="cancel-import">إلغاء</button>
+                                <button class="btn btn-primary" id="confirm-import">✅ تأكيد الاستيراد</button>
                             </div>
                         </div>
                     </div>
