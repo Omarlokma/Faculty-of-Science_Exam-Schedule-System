@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Shared headers for all API calls
     const getHeaders = () => {
-        const h = { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' };
+        const h = { 'Accept': 'application/json' };
         const token = localStorage.getItem('auth_token');
         if (token) h['Authorization'] = `Bearer ${token}`;
         return h;
@@ -37,7 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 sectionsCache = Array.isArray(d) ? d : (d.data || []);
             }
         } catch (e) {
-            console.warn('Preload failed:', e);
+            console.warn('Preload failed, using offline fallback data:', e);
+        }
+
+        // Fallback offline data if API is empty or failed
+        if (!laihasCache || laihasCache.length === 0) {
+            laihasCache = [
+                { id: 1, name: 'قديمة', levels: [{id: 1, name: 'المستوى الأول'}, {id: 2, name: 'المستوى الثاني'}, {id: 3, name: 'المستوى الثالث'}, {id: 4, name: 'المستوى الرابع'}] },
+                { id: 2, name: 'جديدة', levels: [{id: 1, name: 'المستوى الأول'}, {id: 2, name: 'المستوى الثاني'}, {id: 3, name: 'المستوى الثالث'}, {id: 4, name: 'المستوى الرابع'}] },
+                { id: 3, name: 'برامج', levels: [{id: 1, name: 'المستوى الأول'}, {id: 2, name: 'المستوى الثاني'}, {id: 3, name: 'المستوى الثالث'}, {id: 4, name: 'المستوى الرابع'}] },
+                { id: 4, name: 'معادلة', levels: [{id: 5, name: 'مستوى المعادلة'}] },
+                { id: 5, name: 'متطلب', levels: [{id: 6, name: 'مستوى متطلب الجامعة'}] }
+            ];
+        }
+        if (!sectionsCache || sectionsCache.length === 0) {
+            sectionsCache = [
+                { id: 1, name: 'عام', level: {id: 1} },
+                { id: 2, name: 'كيمياء', level: {id: 2} },
+                { id: 3, name: 'فيزياء', level: {id: 2} },
+                { id: 4, name: 'رياضيات', level: {id: 2} }
+            ];
         }
     };
     preloadData();
@@ -139,8 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Fetch courses, sections, AND laihas in parallel
             const headers = {
-                'Accept': 'application/json',
-                'ngrok-skip-browser-warning': 'true'
+                'Accept': 'application/json'
             };
             const token = localStorage.getItem('auth_token');
             if (token) {

@@ -6,8 +6,7 @@
  * All other JS files use the functions here.
  */
 
-const API_BASE = 'https://irrelievable-reina-puzzlingly.ngrok-free.dev/api';
-
+const API_BASE = 'https://faculty-of-science-final-exam.free.laravel.cloud/api';
 const API = {
     // Auth
     LOGIN:    `${API_BASE}/login`,
@@ -17,6 +16,7 @@ const API = {
 
     // Resources
     COURSES:  `${API_BASE}/courses`,
+    IMPORT_COURSES: `${API_BASE}/courses/import`,
     SECTIONS: `${API_BASE}/sections`,
     LAIHAS:   `${API_BASE}/laihas`,
     LEVELS:   `${API_BASE}/levels`,
@@ -59,7 +59,6 @@ async function apiFetch(url, options = {}) {
     const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true',   // Skip ngrok warning page
         ...options.headers,
     };
 

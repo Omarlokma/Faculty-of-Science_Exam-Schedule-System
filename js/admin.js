@@ -667,33 +667,34 @@ document.addEventListener('DOMContentLoaded', () => {
         let done = 0, failed = 0;
         const errors = [];
 
-        for (const row of validRows) {
-            try {
-                const res = await apiFetch(API.COURSES, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        course_name: row.courseName,
-                        course_code: row.courseCode,
-                        day:         row.day,
-                        date:        row.date,
-                        section_id:  row.sectionId,
-                    })
-                });
-                if (res && res.ok) {
-                    done++;
-                } else {
-                    failed++;
-                    errors.push(`❌ ${row.courseName}: فشل (${res?.status})`);
-                }
-            } catch (err) {
-                failed++;
-                errors.push(`❌ ${row.courseName}: خطأ في الشبكة`);
-            }
+        try {
+            const payload = validRows.map(row => ({
+                course_name: row.courseName,
+                course_code: row.courseCode,
+                day:         row.day,
+                date:        row.date,
+                section_id:  row.sectionId,
+            }));
 
-            // Update progress bar
-            const pct = Math.round(((done + failed) / validRows.length) * 100);
-            progressBar.style.width = pct + '%';
-            progressCount.textContent = `${done + failed} / ${validRows.length}`;
+            const res = await apiFetch(API.IMPORT_COURSES, {
+                method: 'POST',
+                body: JSON.stringify({ courses: payload })
+            });
+
+            if (res && res.ok) {
+                done = validRows.length;
+                progressBar.style.width = '100%';
+                progressCount.textContent = `${done} / ${validRows.length}`;
+            } else {
+                failed = validRows.length;
+                errors.push(`❌ فشل الاستيراد بالكامل (${res?.status})`);
+                const errData = await res.json().catch(() => ({}));
+                if (errData.message) errors.push(errData.message);
+            }
+        } catch (err) {
+            failed = validRows.length;
+            errors.push(`❌ خطأ في الاتصال بالخادم`);
+            console.error(err);
         }
 
         progressLabel.textContent = done > 0 ? `✅ تم استيراد ${done} مادة بنجاح` : 'انتهى الاستيراد';
