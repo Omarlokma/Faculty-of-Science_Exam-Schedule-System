@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Exam Schedule System</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/png" href="assets/logo.png">
     <style>
@@ -54,12 +55,11 @@
             <p class="login-subtitle">Please enter your credentials to continue</p>
 
             <form class="login-form" action="admin.html" method="POST" id="login-form">
-                <!-- For actual backend, change action="admin.html" to action="api/login.php" -->
                 
                 <div class="mb-3">
                     <label class="form-label d-flex align-items-center justify-content-between" for="username">
                         <span class="d-flex align-items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <i class="fa-regular fa-user"></i>
                             Username
                         </span>
                         <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">اسم المستخدم</span>
@@ -70,7 +70,7 @@
                 <div class="mb-3">
                     <label class="form-label d-flex align-items-center justify-content-between" for="password">
                         <span class="d-flex align-items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <i class="fa-solid fa-lock"></i>
                             Password
                         </span>
                         <span class="arabic text-muted" dir="rtl" style="font-size: 0.85em;">كلمة المرور</span>
@@ -79,14 +79,14 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center gap-2 mt-4" style="width: 100%; padding: 0.875rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    <i class="fa-solid fa-right-to-bracket"></i>
                     <span>Login</span>
                     <span class="border-start border-light ps-2 ms-1 arabic" dir="rtl">تسجيل الدخول</span>
                 </button>
             </form>
             
             <a href="index.html" class="d-inline-flex align-items-center gap-2 mt-4 text-muted text-decoration-none" style="font-size: 0.875rem; transition: color 0.2s ease;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <i class="fa-solid fa-arrow-left"></i>
                 Back to Student Portal
             </a>
         </div>

@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.className = `toast ${type}`;
         
         const icon = type === 'success' 
-            ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            ? `<i class="fa-solid fa-circle-check" style="color: var(--success); font-size: 1.25rem;"></i>`
+            : `<i class="fa-solid fa-circle-exclamation" style="color: var(--danger); font-size: 1.25rem;"></i>`;
 
         toast.innerHTML = `${icon} <span>${message}</span>`;
         container.appendChild(toast);
@@ -65,9 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // ============================================
-    // Fetch ALL data from the real API
-    // ============================================
+    // Fetch ALL data from the API
     const fetchAllData = async () => {
         try {
             // Fetch courses, sections, laihas, and levels in parallel
@@ -297,10 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <div class="action-btns">
                         <button class="icon-btn edit-btn" data-id="${item.id}" title="Edit">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button class="icon-btn delete delete-btn" data-id="${item.id}" title="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
                 </td>
@@ -323,9 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filterLevel.addEventListener('change', onFilterLevelChange);
     filterDept.addEventListener('change', renderTable);
 
-    // ============================================
     // Modals Logic (Add / Edit)
-    // ============================================
     const openFormModal = (id = null) => {
         if (id) {
             const course = courses.find(c => c.id === id);
@@ -399,9 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ============================================
     // Delete Course
-    // ============================================
     const openDeleteModal = (id) => {
         currentDeleteId = id;
         const course = courses.find(c => c.id === id);
@@ -437,9 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ============================================
     // Logout
-    // ============================================
     const logoutLink = document.querySelector('.nav-item[href="index.html"]:last-of-type') 
                     || document.querySelector('a.nav-item:has(polyline[points="16 17 21 12 16 7"])');
     
@@ -709,8 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
         parsedRows = [];
     });
 
-    // ============================================
     // Initial Data Load
-    // ============================================
     fetchAllData();
 });

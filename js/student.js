@@ -61,9 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     preloadData();
 
-    // ============================================
     // Cascading Dropdowns Logic
-    // ============================================
 
     // 1) When Regulation changes → Enable Level, Reset Department
     regulation.addEventListener('change', () => {
@@ -240,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!filteredCourses || filteredCourses.length === 0) {
                 emptyState.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <i class="fa-solid fa-circle-exclamation mb-3" style="font-size: 3rem; color: var(--border-color);"></i>
                     <h3>لا يوجد جدول</h3>
                     <p>لا توجد امتحانات مجدولة لهذا الاختيار حالياً.<br>No schedule found for this selection.</p>
                 `;
@@ -273,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching schedule:', error);
             loader.style.display = 'none';
             emptyState.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <i class="fa-solid fa-circle-exclamation mb-3" style="font-size: 3rem; color: var(--danger);"></i>
                 <h3 style="color: var(--danger);">خطأ في تحميل البيانات</h3>
                 <p>حدثت مشكلة في الاتصال بالسيرفر. حاول مرة أخرى لاحقاً.<br>Error connecting to server.</p>
             `;
